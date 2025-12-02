@@ -1,12 +1,15 @@
 package com.android.mid_termexam.todo
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.android.mid_termexam.todo.model.Todo
 import com.android.mid_termexam.todo.screen.FirstScreen
 import com.android.mid_termexam.todo.screen.SecondScreen
 import com.android.mid_termexam.todo.screen.ThirdScreen
@@ -45,33 +48,60 @@ import com.android.mid_termexam.todo.screen.ThirdScreen
 @Composable
 fun MainNavigation(paddingValues: PaddingValues) {
     val navController = rememberNavController()
+
     NavHost(
         navController = navController,
         startDestination = "first_screen",
-        modifier = Modifier.padding(paddingValues)
+        modifier = Modifier.padding(paddingValues).fillMaxSize()
     ) {
         composable("first_screen") {
             FirstScreen(
                 modifier = Modifier.padding(paddingValues),
-                onClick = {},
-                onBackClick = {},
-                )
+                onAuthSuccess = { email ->
+                    // pass email to next screen (kept in SavedStateHandle of current backstack entry)
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("user_email", email)
+                    navController.navigate("second_screen")
+                }
+            )
         }
 
         composable("second_screen") {
             SecondScreen(
                 modifier = Modifier.padding(paddingValues),
-                onClick = {},
-                onBackClick = {}
+                onOpenDetail = { todo ->
+                    // place selected todo into SavedStateHandle of current (second) backstack entry
+                    navController.currentBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("selected_todo", todo)
+                    navController.navigate("third_screen")
+                }
             )
         }
 
-        composable("third_screen") {
-            ThirdScreen(
-                modifier = Modifier.padding(paddingValues),
-                onClick = {},
-                onBackClick = {}
-            )
+        composable("third_screen") { backStackEntry ->
+            // read the todo placed by SecondScreen from the previous back stack entry
+            val selected = navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.get<Todo>("selected_todo")
+
+            if (selected != null) {
+                ThirdScreen(
+                    todo = selected,
+                    modifier = Modifier.padding(paddingValues),
+                    onSave = { updated ->
+                        // send updated todo back to SecondScreen (or any listener) via previous back stack
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set("updated_todo", updated)
+                        navController.popBackStack()
+                    }
+                )
+            } else {
+                // fallback UI if no todo found
+                Text("No item selected", modifier = Modifier.padding(paddingValues))
+            }
         }
     }
 }

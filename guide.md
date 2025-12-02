@@ -41,7 +41,22 @@ val myVar by remember { mutableStateOf(0) }
 implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
 implementation("androidx.navigation:navigation-compose:2.5.1")
 ```
+```bash
+# Tắt
+Disable-NetAdapter -Name "Wi-Fi" -Confirm:$false
+```
+```bash
+# Bật
+Enable-NetAdapter -Name "Wi-Fi" -Confirm:$false
+```
 
+```bash
+Remove-Item -Recurse -Force .git
+```
+
+```bash
+git update
+```
 ## Phần 1: Các dạng sẽ xuất hiện trong đề thi
 1. Các button và sự kiện click 
 2. TextView và EditText - nhập và hiển thị văn bản

@@ -1,81 +1,62 @@
+// File: app/src/main/java/com/android/mid_termexam/todo/screen/FirstScreen.kt
 package com.android.mid_termexam.todo.screen
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.mid_termexam.todo.viewmodel.FirstViewModel
 
-/**
- * XEM PHẦN Example của mỗi phần để lấy hướng dẫn cụ thể
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun FirstScreen(
-    modifier: Modifier,
-    onClick: () -> Unit = { },
-    onBackClick: () -> Unit = { },
-    viewModel: FirstViewModel = viewModel()
+    modifier: Modifier = Modifier,
+    viewModel: FirstViewModel = viewModel(),
+    onAuthSuccess: (String) -> Unit = { }
 ) {
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text("Todo List") }
-            )
-        },
-    ) {
+    Surface(modifier = modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center, // Sắp xếp theo chiều dọc, từ trên xuống dưới
-            horizontalAlignment = Alignment.CenterHorizontally // Căn giữa theo chiều ngang
+            modifier = Modifier.padding(24.dp),
+            verticalArrangement = Arrangement.Center
         ) {
-            // Các thành phần sẽ được xếp từ trên xuống dưới, giữa theo chiều ngang
-            Box(
-                modifier = Modifier
-                    .size(70.dp)
-                    .clip(CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier.size(50.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Order Cupcake",
-                fontSize = 12.sp,
-                maxLines = 1
+            OutlinedTextField(
+                value = viewModel.email,
+                onValueChange = viewModel::onEmailChange,
+                label = { Text("Email") },
+                isError = viewModel.email.isNotBlank() && !viewModel.isEmailValid()
             )
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedTextField(
+                value = viewModel.password,
+                onValueChange = viewModel::onPasswordChange,
+                label = { Text("Password (min 6)") },
+                singleLine = true,
+                isError = viewModel.password.isNotBlank() && !viewModel.isPasswordValid()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    if (viewModel.login()) onAuthSuccess(viewModel.email)
+                },
+                enabled = viewModel.canSubmit()
+            ) {
+                Text("Login")
+            }
+            TextButton(onClick = {
+                if (viewModel.register()) onAuthSuccess(viewModel.email)
+            }) {
+                Text("Register")
+            }
         }
     }
-}
-
-@Composable
-@Preview
-fun FirstScreenPreview() {
-    FirstScreen(modifier = Modifier)
 }
