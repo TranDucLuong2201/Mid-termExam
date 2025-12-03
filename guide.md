@@ -5,7 +5,6 @@
 - Chỉ sửa đổi các file ở package [`todo`](app/src/main/java/com/android/mid_termexam/todo). Các file khác không được sửa đổi.\
 - File nào có đánh dấu TODO thì mới được sửa đổi, các phần khác không được sửa đổi.
 - File có @Composable là file giao diện, file có ViewModel là file quản lý dữ liệu
-- Mặc định UI sẽ ở package [`screen`](app/src/main/java/com/android/mid_termexam/todo/screen)
 - Mặc định Viewmodel sẽ ở package [`viewmodel`](app/src/main/java/com/android/mid_termexam/todo/viewmodel)
 - Nếu đề cần data class hãy tạo trong package [`data`](app/src/main/java/com/android/mid_termexam/todo/model) (Xem ví dụ trong đó)
 
@@ -53,6 +52,7 @@ Enable-NetAdapter -Name "Wi-Fi" -Confirm:$false
 ```bash
 Remove-Item -Recurse -Force .git
 ```
+- Mặc định UI sẽ ở package [`screen`](app/src/main/java/com/android/mid_termexam/todo/screen/Example.kt)
 
 ```bash
 git update

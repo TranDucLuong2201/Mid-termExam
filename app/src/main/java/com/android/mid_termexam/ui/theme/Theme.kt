@@ -9,18 +9,38 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
+private val colors = listOf<Color>(
+    Color(0xFFEF9A9A),
+    Color(0xFFF48FB1),
+    Color(0xFFCE93D8),
+    Color(0xFFB39DDB),
+    Color(0xFF9FA8DA),
+    Color(0xFF90CAF9),
+    Color(0xFF81D4FA),
+    Color(0xFF80DEEA),
+    Color(0xFF80CBC4),
+    Color(0xFFA5D6A7),
+    Color(0xFFC5E1A5),
+    Color(0xFFE6EE9C),
+    Color(0xFFFFF59D),
+    Color(0xFFFFE082),
+    Color(0xFFFFCC80),
+    Color(0xFFFFAB91)
+)
+
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = colors.random(),
+    secondary = colors.random(),
+    tertiary = colors.random()
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = colors.random(),
+    secondary = colors.random(),
+    tertiary = colors.random()
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -37,15 +57,9 @@ private val LightColorScheme = lightColorScheme(
 fun MidtermExamTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }

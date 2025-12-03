@@ -1,18 +1,12 @@
 package com.android.mid_termexam.todo
 
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.android.mid_termexam.todo.model.Todo
-import com.android.mid_termexam.todo.screen.FirstScreen
-import com.android.mid_termexam.todo.screen.SecondScreen
-import com.android.mid_termexam.todo.screen.ThirdScreen
+import com.android.mid_termexam.todo.screen.CakeMenuScreen
+import com.android.mid_termexam.todo.screen.OrderCakeScreen
 
 /**
  * Đề bài thường sẽ yêu cầu triển khai một ứng dụng có chức năng chuyển trang này sang trang khác, và ngược lại.
@@ -38,7 +32,7 @@ import com.android.mid_termexam.todo.screen.ThirdScreen
  * }
  * ```
  * @param fourth_screen: Tên định danh của trang, dùng để chuyển trang. Không rành thì nên đặt theo thứ tự first_screen, second_screen, ...
- * @param com.android.mid_termexam.todo.screen.FirstScreen: Mỗi trang sẽ có 1 Composable riêng, tự tạo file và hàm Composable cho từng trang.
+ * @param com.android.mid_termexam.todo.screen.AuthenticationScreen: Mỗi trang sẽ có 1 Composable riêng, tự tạo file và hàm Composable cho từng trang.
  * Phía dưới sẽ setup sẵn 3 trang, bạn chỉ cần chỉnh sửa tên hàm và thêm bớt trang cho phù hợp với đề bài. theo thứ tự 1 -> 2 -> 3, và 3 -> 2 -> 1.
  *
  * Để chỉnh sửa, tìm file có tên tương ứng rồi sửa, hoặc ấn Ctrl + Click vào tên hàm để điều hướng đến file đó.
@@ -49,59 +43,20 @@ import com.android.mid_termexam.todo.screen.ThirdScreen
 fun MainNavigation(paddingValues: PaddingValues) {
     val navController = rememberNavController()
 
-    NavHost(
-        navController = navController,
-        startDestination = "first_screen",
-        modifier = Modifier.padding(paddingValues).fillMaxSize()
-    ) {
-        composable("first_screen") {
-            FirstScreen(
-                modifier = Modifier.padding(paddingValues),
-                onAuthSuccess = { email ->
-                    // pass email to next screen (kept in SavedStateHandle of current backstack entry)
-                    navController.currentBackStackEntry
-                        ?.savedStateHandle
-                        ?.set("user_email", email)
-                    navController.navigate("second_screen")
-                }
-            )
-        }
+    NavHost(navController = navController, startDestination = "menu") {
 
-        composable("second_screen") {
-            SecondScreen(
-                modifier = Modifier.padding(paddingValues),
-                onOpenDetail = { todo ->
-                    // place selected todo into SavedStateHandle of current (second) backstack entry
-                    navController.currentBackStackEntry
-                        ?.savedStateHandle
-                        ?.set("selected_todo", todo)
-                    navController.navigate("third_screen")
-                }
-            )
-        }
-
-        composable("third_screen") { backStackEntry ->
-            // read the todo placed by SecondScreen from the previous back stack entry
-            val selected = navController.previousBackStackEntry
-                ?.savedStateHandle
-                ?.get<Todo>("selected_todo")
-
-            if (selected != null) {
-                ThirdScreen(
-                    todo = selected,
-                    modifier = Modifier.padding(paddingValues),
-                    onSave = { updated ->
-                        // send updated todo back to SecondScreen (or any listener) via previous back stack
-                        navController.previousBackStackEntry
-                            ?.savedStateHandle
-                            ?.set("updated_todo", updated)
-                        navController.popBackStack()
+        composable("menu") {
+            CakeMenuScreen(
+                onNext = {
+                    navController.navigate("order") {
                     }
-                )
-            } else {
-                // fallback UI if no todo found
-                Text("No item selected", modifier = Modifier.padding(paddingValues))
-            }
+                }
+            )
+        }
+        composable("order") {
+            OrderCakeScreen(
+                onBack = { navController.navigateUp() }
+            )
         }
     }
 }

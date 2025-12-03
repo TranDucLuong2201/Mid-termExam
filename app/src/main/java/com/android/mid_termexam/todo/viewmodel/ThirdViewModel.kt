@@ -6,45 +6,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import com.android.mid_termexam.todo.model.Todo
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-class ThirdViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
-    // keys are simple; values persist via SavedStateHandle across process death/config changes when supported
-    private fun keyTitle(id: Int) = "todo_title_$id"
-    private fun keyDesc(id: Int) = "todo_desc_$id"
 
-    var title by mutableStateOf("")
-        private set
-    var description by mutableStateOf("")
-        private set
+class ThirdViewModel : ViewModel() {
 
-    // initialize once from Todo if not already in SavedStateHandle
-    fun initIfNeeded(todo: Todo) {
-        val t = savedStateHandle.get<String>(keyTitle(todo.id))
-        val d = savedStateHandle.get<String>(keyDesc(todo.id))
-        if (t == null) {
-            title = todo.title
-            savedStateHandle[keyTitle(todo.id)] = title
-        } else {
-            title = t
-        }
-        if (d == null) {
-            description = todo.description
-            savedStateHandle[keyDesc(todo.id)] = description
-        } else {
-            description = d
-        }
-    }
+    private val _slider = MutableStateFlow(0f)
+    val slider = _slider.asStateFlow()
 
-    fun onTitleChange(v: String, todoId: Int) {
-        title = v
-        savedStateHandle[keyTitle(todoId)] = v
-    }
+    private val _selected = MutableStateFlow("A")
+    val selected = _selected.asStateFlow()
 
-    fun onDescriptionChange(v: String, todoId: Int) {
-        description = v
-        savedStateHandle[keyDesc(todoId)] = v
-    }
+    private val _expanded = MutableStateFlow(false)
+    val expanded = _expanded.asStateFlow()
 
-    fun buildUpdated(todo: Todo): Todo = todo.copy(title = title, description = description)
+    fun setSlider(v: Float) { _slider.value = v }
+    fun setSelected(v: String) { _selected.value = v }
+    fun setExpanded(v: Boolean) { _expanded.value = v }
 }

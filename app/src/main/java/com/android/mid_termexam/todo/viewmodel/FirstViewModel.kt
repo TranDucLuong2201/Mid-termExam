@@ -1,35 +1,24 @@
 // File: app/src/main/java/com/android/mid_termexam/todo/screen/FirstViewModel.kt
 package com.android.mid_termexam.todo.viewmodel
 
-import android.util.Patterns
-import androidx.compose.runtime.getValue
+
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-class FirstViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel() {
-    var email by mutableStateOf(savedStateHandle.get<String>("email") ?: "")
-        private set
-    var password by mutableStateOf(savedStateHandle.get<String>("password") ?: "")
-        private set
 
-    fun onEmailChange(v: String) {
-        email = v
-        savedStateHandle["email"] = v
-    }
+class FirstViewModel : ViewModel() {
+    private val _text = MutableStateFlow("")
+    val text = _text.asStateFlow()
 
-    fun onPasswordChange(v: String) {
-        password = v
-        savedStateHandle["password"] = v
-    }
+    private val _checked = MutableStateFlow(false)
+    val checked = _checked.asStateFlow()
 
-    fun isEmailValid(): Boolean = email.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches()
-    fun isPasswordValid(): Boolean = password.length >= 6
+    private val _switchOn = MutableStateFlow(false)
+    val switchOn = _switchOn.asStateFlow()
 
-    fun canSubmit(): Boolean = isEmailValid() && isPasswordValid()
-
-    // Simple placeholder actions: return true when validation passes
-    fun login(): Boolean = canSubmit()
-    fun register(): Boolean = canSubmit()
+    fun setText(t: String) { _text.value = t }
+    fun toggleCheck(b: Boolean) { _checked.value = b }
+    fun toggleSwitch(b: Boolean) { _switchOn.value = b }
 }
