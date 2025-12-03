@@ -32,7 +32,7 @@ class OrderCakeViewModel : ViewModel() {
             currentState.copy(flavor = desiredFlavor)
         }
     }
-    private fun calculateTotal(
+    fun calculateTotal(
         quantity: Int = _uiState.value.quantity,
         pickupDate: String = _uiState.value.date
     ): String {

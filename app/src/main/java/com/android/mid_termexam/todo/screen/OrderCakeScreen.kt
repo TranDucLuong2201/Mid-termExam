@@ -3,6 +3,7 @@ package com.android.mid_termexam.todo.screen
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -28,5 +29,8 @@ fun OrderCakeScreen(
             value = uiState.value.price,
             onValueChange = {viewModel.calculateTotal()}
         )
+        Button(onClick = {onBack()}) {
+            Text("Back")
+        }
     }
 }

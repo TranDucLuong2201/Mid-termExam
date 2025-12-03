@@ -1,62 +1,210 @@
 package com.android.mid_termexam.todo
 
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.runtime.Composable
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.android.mid_termexam.todo.screen.CakeMenuScreen
-import com.android.mid_termexam.todo.screen.OrderCakeScreen
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.*
+import androidx.navigation.navArgument
+import com.android.mid_termexam.R
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 
-/**
- * Đề bài thường sẽ yêu cầu triển khai một ứng dụng có chức năng chuyển trang này sang trang khác, và ngược lại.
- *
- * Vì vậy, Setup MainNavigation để thực hiện phân trang
- *
- * Phía dưới đã được set up sẵn, sau đây là hướng dẫn để tạo thêm trang mới nếu cần.
- *
- * B1: Tạo một hàm Composable đại diện cho trang mới, ví dụ FourthScreen, các parameter tương tự, không dùng cũng không sao
- *
- * B2: Tạo viewmodel FourthViewModel nếu cần quản lý dữ liệu. Sau đó quay lại đây để setup navigation
- *
- * B3: Thêm đoạn code sau vào NavHost, sửa tên hàm và tên định danh trang cho phù hợp
- *
- * ```
- * val fourth_screen = "fourth_screen" // Tên định danh của trang
- * composable("fourth_screen") {
- *    FourthScreen(
- *      modifier = Modifier.padding(paddingValues),
- *      onClick = {},
- *      onBackClick = {}
- *    )
- * }
- * ```
- * @param fourth_screen: Tên định danh của trang, dùng để chuyển trang. Không rành thì nên đặt theo thứ tự first_screen, second_screen, ...
- * @param com.android.mid_termexam.todo.screen.AuthenticationScreen: Mỗi trang sẽ có 1 Composable riêng, tự tạo file và hàm Composable cho từng trang.
- * Phía dưới sẽ setup sẵn 3 trang, bạn chỉ cần chỉnh sửa tên hàm và thêm bớt trang cho phù hợp với đề bài. theo thứ tự 1 -> 2 -> 3, và 3 -> 2 -> 1.
- *
- * Để chỉnh sửa, tìm file có tên tương ứng rồi sửa, hoặc ấn Ctrl + Click vào tên hàm để điều hướng đến file đó.
- *
- */
+// ------------------- DATA -------------------
+data class Cake(
+    val id: Int,
+    val name: String,
+    val pricePerUnit: Int = 2
+)
+val cakes = listOf(
+    Cake(1, "Bánh Tỏi"),
+    Cake(2, "Bánh Kem"),
+    Cake(3, "Bánh Mì"),
+    Cake(4, "Bánh Socola")
+)
+// ------------------- VIEWMODEL -------------------
+class DetailViewModel : ViewModel() {
 
+    private val _quantity = MutableStateFlow(1)
+    val quantity: StateFlow<Int> = _quantity
+
+    private val _cake = MutableStateFlow<Cake?>(null)
+    val cake: StateFlow<Cake?> = _cake
+
+    fun setCakeById(id: Int) {
+        _cake.value = cakes.find { it.id == id }
+    }
+
+    fun updateQuantity(value: String) {
+        _quantity.value = value.toIntOrNull()?.coerceAtLeast(1) ?: 1
+    }
+
+    val totalPrice = combine(quantity, cake) { q, c ->
+        if (c == null) 0 else q * c.pricePerUnit
+    }
+}
+
+
+// ------------------- MAIN -------------------
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            MaterialTheme {
+                AppNav()
+            }
+        }
+    }
+}
+
+// ------------------- NAVIGATION -------------------
 @Composable
-fun MainNavigation(paddingValues: PaddingValues) {
-    val navController = rememberNavController()
+fun AppNav() {
+    val nav = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "menu") {
+    NavHost(navController = nav, startDestination = "menu") {
 
         composable("menu") {
-            CakeMenuScreen(
-                onNext = {
-                    navController.navigate("order") {
+            MenuScreen(
+                onClick = { id ->
+                    nav.navigate("detail/$id")
+                }
+            )
+        }
+
+        composable(
+            "detail/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val id = backStackEntry.arguments?.getInt("id") ?: 1
+            DetailScreen(id = id)
+        }
+
+    }
+}
+
+// ------------------- MENU SCREEN -------------------
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MenuScreen(onClick: (Int) -> Unit) {
+
+
+
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text("Menu Bánh") })
+        }
+    ) { padding ->
+        LazyColumn(
+            contentPadding = padding,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(cakes) { cake ->
+                Card(
+                    onClick = { onClick(cake.id) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = cake.name, fontWeight = FontWeight.Bold)
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                            contentDescription = null
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ------------------- DETAIL SCREEN -------------------
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DetailScreen(
+    id: Int,
+    vm: DetailViewModel = viewModel(),
+    nav: NavHostController = rememberNavController()
+) {
+    LaunchedEffect(id) {
+        vm.setCakeById(id)
+    }
+
+    val cake by vm.cake.collectAsState()
+    val quantity by vm.quantity.collectAsState()
+    val total by vm.totalPrice.collectAsState(initial = 0)
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Chi tiết bánh") },
+                navigationIcon = {
+                    IconButton(onClick = { nav.popBackStack() }) {
+                        Icon(
+                            painterResource(id = R.drawable.ic_launcher_foreground),
+                            contentDescription = "Back"
+                        )
                     }
                 }
             )
         }
-        composable("order") {
-            OrderCakeScreen(
-                onBack = { navController.navigateUp() }
-            )
+    ) { padding ->
+        if (cake == null) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) { Text("Không tìm thấy bánh!") }
+        } else {
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .padding(20.dp)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+
+                Text(cake!!.name, fontSize = MaterialTheme.typography.titleLarge.fontSize)
+                Spacer(Modifier.height(10.dp))
+                Text("Giá: ${cake!!.pricePerUnit} / cái")
+
+                Spacer(Modifier.height(25.dp))
+
+                OutlinedTextField(
+                    value = quantity.toString(),
+                    onValueChange = { vm.updateQuantity(it) },
+                    label = { Text("Số lượng") },
+                    singleLine = true,
+                    modifier = Modifier.width(200.dp)
+                )
+
+                Spacer(Modifier.height(30.dp))
+
+                Text("Tổng tiền: $total", fontSize = MaterialTheme.typography.headlineMedium.fontSize)
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.android.mid_termexam.todo.screen
 
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,14 +18,14 @@ import com.android.mid_termexam.todo.viewmodel.CakeMenuViewModel
 
 @Composable
 fun CakeMenuScreen(
-    onNext: (Int) -> Unit,
+    onNext: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CakeMenuViewModel = viewModel()
 ) {
     val list = viewModel.items
     LazyColumn(Modifier) {
         items(list.value) { item ->
-            Row(modifier = modifier.fillMaxWidth()) {
+            Row(modifier = modifier.fillMaxWidth().clickable{onNext()}) {
                 Icon(imageVector = Icons.Default.Image, contentDescription = null)
                 Text(item.name)
             }
